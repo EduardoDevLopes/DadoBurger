@@ -1,8 +1,10 @@
 #include <iostream>
 #include <string>
+#include <random>
 #include "constants.h"
 #include "jogo.h"
 #include "menu.h"
+#include "pedido.h"
 
 using namespace std;
 
@@ -22,6 +24,10 @@ int main(int argc, char** argv) {
          << " (altura " << jogo.estatAVL.altura
          << ", rotacoes " << jogo.estatAVL.rotacoes << ")\n";
 
+    // Inicializa seed e o gerador de números aleatórios
+    random_device seed;
+    mt19937 geradorAleatorio(seed());
+
     EstadoJogo estadoAtual = ESTADO_MENU;
 
     // LOOP PRINCIPAL (máquina de estados)
@@ -37,6 +43,26 @@ int main(int argc, char** argv) {
                 // TODO: Game Loop (turnos, chegada de clientes, paciência, montagem,
                 // validade dos lotes, pontuação) e, ao fim, salvar Partida em jogo.historico
                 cout << "[Partida em construcao]\n";
+
+
+                // ---------------------------------------------------------------------------
+                // PARTE DO PEDIDO - temporariamente na main
+                {
+
+                    // Sorteia o pedido
+                    int pedidoId = sortearPedido(geradorAleatorio, 1, jogo.estatAVL.nos);
+
+                    // busca pedido
+                    int comp = 0;
+                    const Pedido *pedido = buscarHash(jogo.cache, pedidoId, jogo.indice, comp);
+
+                    // imprime pedido
+                    imprimirPedido(*pedido);
+                
+                }
+                // FIM DA PARTE DO PEDIDO
+                // ---------------------------------------------------------------------------
+                
                 estadoAtual = ESTADO_MENU;
                 break;
 

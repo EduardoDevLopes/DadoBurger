@@ -1,6 +1,7 @@
 #ifndef PEDIDO_H
 #define PEDIDO_H
 #include <string>
+#include <random>
 #include "lista.h"
 
 // Representa um pedido cadastrado em pedidos.txt
@@ -10,5 +11,8 @@ struct Pedido {
     std::string nome;     // nome do lanche
     NoIng* receita;       // lista encadeada de ingredientes
 };
+
+int sortearPedido(std::mt19937 &geradorAleatorio, int min, int max);
+void imprimirPedido(const Pedido& p);
 
 #endif

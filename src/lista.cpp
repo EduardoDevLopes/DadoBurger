@@ -3,8 +3,8 @@
 using namespace std;
 
 // INSERÇÃO
-void inserirIngredienteFim(NoIng*& ini, const string& nome) {
-    NoIng* novo = new NoIng{nome, nullptr};
+void inserirIngredienteFim(NoIng*& ini, const char& simbolo) {
+    NoIng* novo = new NoIng{simbolo, nullptr};
     if (ini == nullptr) {
         ini = novo;
         return;

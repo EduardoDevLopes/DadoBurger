@@ -14,15 +14,20 @@ using namespace std;
 
 static void testarListaEPilha() {
     NoIng* rec = nullptr;
-    for (const char* s : {"pao", "carne", "queijo", "pao"}) inserirIngredienteFim(rec, s);
+    for (char simbolo : {'z', 'k', 'm', 'p'}) inserirIngredienteFim(rec, simbolo);
+
     Pilha chapa;
-    for (const char* s : {"pao", "carne", "queijo"}) pushIngrediente(chapa, s);
+    for (char simbolo : {'z', 'k', 'm'}) pushIngrediente(chapa, simbolo);
     assert(!verificarPedido(chapa, rec));
-    pushIngrediente(chapa, "alface");
-    string r;
-    assert(popIngrediente(chapa, &r) && r == "alface");
-    pushIngrediente(chapa, "pao");
+
+    pushIngrediente(chapa, 'z');
+    assert(!verificarPedido(chapa, rec));
+    char removido = '\0';
+    assert(popIngrediente(chapa, &removido) && removido == 'z');
+
+    pushIngrediente(chapa, 'p');
     assert(verificarPedido(chapa, rec));
+
     destruirPilha(chapa);
     destruirLista(rec);
 }
