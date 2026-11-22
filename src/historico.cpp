@@ -1,40 +1,64 @@
 #include "historico.h"
-#include <chrono>
-#include <utility>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
-using namespace std;
+void inicializarLista(ListaContigua& l) { l.v = nullptr; l.tam = 0; l.cap = 0; }
 
-// CRITÉRIOS DE ORDENAÇÃO
-bool maiorPontuacao(const Partida& a, const Partida& b) { return a.pontuacao > b.pontuacao; }
-bool menorTempo(const Partida& a, const Partida& b) { return a.tempoAtendimento < b.tempoAtendimento; }
-
-// HEAP SORT
-static void heapifyPartida(vector<Partida>& v, size_t n, size_t i, CriterioPartida antes) {
-    while (true) {
-        size_t ultimo = i, esq = 2 * i + 1, dir = 2 * i + 2;
-        if (esq < n && antes(v[ultimo], v[esq])) ultimo = esq;   // filho que vem "depois" sobe
-        if (dir < n && antes(v[ultimo], v[dir])) ultimo = dir;
-        if (ultimo == i) break;
-        swap(v[i], v[ultimo]);
-        i = ultimo;
+void acrescentar(ListaContigua& l, const Entrada& e) {
+    if (l.tam == l.cap) {
+        int nc = l.cap == 0 ? 1024 : l.cap * 2;
+        Entrada* nv = new Entrada[nc];
+        if (l.tam > 0) memcpy(nv, l.v, sizeof(Entrada) * l.tam);
+        delete[] l.v;
+        l.v = nv; l.cap = nc;
     }
+    l.v[l.tam++] = e;
 }
 
-void ordenarHistorico(vector<Partida>& hist, CriterioPartida antes) {
-    size_t n = hist.size();
-    if (n < 2) return;
-    for (size_t i = n / 2; i-- > 0;) heapifyPartida(hist, n, i, antes);   // build-heap O(n)
-    for (size_t i = n - 1; i > 0; i--) {                                  // extrações O(n log n)
-        swap(hist[0], hist[i]);
-        heapifyPartida(hist, i, 0, antes);
-    }
+void destruirLista(ListaContigua& l) { delete[] l.v; inicializarLista(l); }
+
+Entrada* copiarVetor(const ListaContigua& l) {
+    Entrada* c = new Entrada[l.tam > 0 ? l.tam : 1];
+    if (l.tam > 0) memcpy(c, l.v, sizeof(Entrada) * l.tam);
+    return c;
 }
 
-// MEDIÇÃO DE DESEMPENHO
-double medirOrdenacao(const vector<Partida>& hist, CriterioPartida antes) {
-    vector<Partida> copia = hist;
-    auto t0 = chrono::steady_clock::now();
-    ordenarHistorico(copia, antes);
-    auto t1 = chrono::steady_clock::now();
-    return chrono::duration<double>(t1 - t0).count();
+static void cortarFim(char* s) {
+    size_t n = strlen(s);
+    while (n > 0 && (s[n - 1] == '\n' || s[n - 1] == '\r')) s[--n] = '\0';
+}
+
+int carregarHistorico(const char* arquivo, ListaContigua& l) {
+    FILE* f = fopen(arquivo, "r");
+    if (!f) return 0;
+    char nome[256], pts[256];
+    int lidos = 0;
+    while (fgets(nome, sizeof nome, f) && fgets(pts, sizeof pts, f)) {
+        cortarFim(nome);
+        Entrada e;
+        strncpy(e.nome, nome, 20);
+        e.nome[20] = '\0';
+        e.pontos = atoi(pts);
+        acrescentar(l, e);
+        lidos++;
+    }
+    fclose(f);
+    return lidos;
+}
+
+bool anexarHistorico(const char* arquivo, const Entrada& e) {
+    /* garante que o arquivo termine com '\n' antes de anexar */
+    bool precisaQuebra = false;
+    FILE* r = fopen(arquivo, "rb");
+    if (r) {
+        if (fseek(r, -1, SEEK_END) == 0) precisaQuebra = (fgetc(r) != '\n');
+        fclose(r);
+    }
+    FILE* f = fopen(arquivo, "a");
+    if (!f) return false;
+    if (precisaQuebra) fputc('\n', f);
+    fprintf(f, "%s\n%d\n", e.nome, e.pontos);
+    fclose(f);
+    return true;
 }

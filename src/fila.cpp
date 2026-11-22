@@ -22,28 +22,12 @@ bool desenfileirarCliente(Fila& f, Cliente& out) {
     return true;
 }
 
-// PACIÊNCIA
-int atualizarPaciencia(Fila& f, vector<Cliente>* desistentes) {
-    int removidos = 0;
-    NoFila* ant = nullptr;
-    NoFila* cur = f.ini;
-    while (cur != nullptr) {
-        cur->c.paciencia--;
-        NoFila* prox = cur->prox;
-        if (cur->c.paciencia <= 0) {
-            if (desistentes != nullptr) desistentes->push_back(cur->c);
-            if (ant == nullptr) f.ini = prox;
-            else ant->prox = prox;
-            if (cur == f.fim) f.fim = ant;
-            delete cur;
-            f.tam--;
-            removidos++;
-        } else {
-            ant = cur;
-        }
-        cur = prox;
-    }
-    return removidos;
+// PACIÊNCIA (só o cliente da frente)
+Cliente* frenteFila(Fila& f) { return f.ini ? &f.ini->c : nullptr; }
+
+int reduzirPacienciaFrente(Fila& f) {
+    if (f.ini == nullptr) return -1;
+    return --f.ini->c.paciencia;
 }
 
 void destruirFila(Fila& f) {

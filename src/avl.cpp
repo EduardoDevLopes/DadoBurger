@@ -4,8 +4,12 @@
 using namespace std;
 
 // FUNÇÕES AUXILIARES DE ALTURA E BALANCEAMENTO
-static int alturaNo(const NoAVL* n) { return n == nullptr ? -1 : n->altura; }
-static void atualizarAltura(NoAVL* n) { n->altura = 1 + max(alturaNo(n->esq), alturaNo(n->dir)); }
+static int alturaNo(const NoAVL* n) { return n == nullptr ? 0 : n->altura; }
+static int tamNo(const NoAVL* n) { return n == nullptr ? 0 : n->tam; }
+static void atualizarAltura(NoAVL* n) {
+    n->altura = 1 + max(alturaNo(n->esq), alturaNo(n->dir));
+    n->tam = 1 + tamNo(n->esq) + tamNo(n->dir);
+}
 static int fatorBalanco(const NoAVL* n) { return n == nullptr ? 0 : alturaNo(n->esq) - alturaNo(n->dir); }
 
 // ROTAÇÕES (cada chamada incrementa o contador)
@@ -46,7 +50,7 @@ static NoAVL* rebalancear(NoAVL* no, int& rot) {
 
 // INSERÇÃO E BUSCA
 NoAVL* inserirAVL(NoAVL* no, Pedido p, int& rot) {
-    if (no == nullptr) return new NoAVL{p, 0, nullptr, nullptr};
+    if (no == nullptr) return new NoAVL{p, 1, 1, nullptr, nullptr};
     if (p.id < no->p.id) no->esq = inserirAVL(no->esq, p, rot);
     else if (p.id > no->p.id) no->dir = inserirAVL(no->dir, p, rot);
     else {
@@ -68,9 +72,17 @@ NoAVL* buscarAVL(NoAVL* r, int id, int& comp) {
 // CONSULTAS E DESTRUIÇÃO
 int alturaAVL(const NoAVL* r) { return alturaNo(r); }
 
-int contarNosAVL(const NoAVL* r) {
-    return r == nullptr ? 0 : 1 + contarNosAVL(r->esq) + contarNosAVL(r->dir);
+NoAVL* selecionarAVL(NoAVL* r, int k) {
+    while (r != nullptr) {
+        int e = tamNo(r->esq);
+        if (k == e) return r;
+        if (k < e) r = r->esq;
+        else { k -= e + 1; r = r->dir; }
+    }
+    return nullptr;
 }
+
+int contarNosAVL(const NoAVL* r) { return tamNo(r); }
 
 void destruirAVL(NoAVL*& r) {
     if (r == nullptr) return;

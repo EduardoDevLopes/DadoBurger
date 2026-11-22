@@ -1,11 +1,10 @@
 #ifndef FILA_H
 #define FILA_H
-#include <vector>
 
 // FILA (FIFO) - balcão de atendimento
 struct Cliente {
-    int id;
-    int idPedido;     // chave do pedido na AVL
+    int id;           // ordem de chegada (1..N)
+    int idPedido;     // chave do pedido na AVL (preenchida quando chega à frente)
     int paciencia;    // turnos restantes antes de desistir
 };
 
@@ -26,9 +25,13 @@ void enfileirarCliente(Fila& f, const Cliente& c);
 // Atende e remove o cliente da frente. Retorna false se vazia. O(1)
 bool desenfileirarCliente(Fila& f, Cliente& out);
 
-// Decrementa a paciência de todos e remove os que chegaram a 0. O(n)
-// Retorna o número de desistentes; se 'desistentes' != nullptr, preenche com eles
-int atualizarPaciencia(Fila& f, std::vector<Cliente>* desistentes = nullptr);
+// Cliente da frente (nullptr se vazia). O(1)
+Cliente* frenteFila(Fila& f);
+
+// ADAPTAÇÃO: o esqueleto decrementava a paciência de TODOS os clientes; o enunciado
+// (§3.3) diz que só o da frente perde paciência. Decrementa 1 turno do cliente da frente
+// e devolve a paciência restante (-1 se a fila está vazia). O(1)
+int reduzirPacienciaFrente(Fila& f);
 
 // Libera todos os nós da fila
 void destruirFila(Fila& f);

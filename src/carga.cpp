@@ -1,47 +1,54 @@
 #include "carga.h"
-#include <chrono>
+#include "timer.hpp"
 #include <fstream>
-#include <sstream>
+#include <stdexcept>
 #include "constants.h"
 
 using namespace std;
-
-// PARSING DE UMA LINHA
-bool parsearLinhaPedido(const string& linha, Pedido& p) {
-    if (linha.empty() || linha[0] == '#') return false;
-
-    stringstream ss(linha);
-    string sId, nome, ings;
-    if (!getline(ss, sId, SEPARADOR_CAMPO) || !getline(ss, nome, SEPARADOR_CAMPO) || !getline(ss, ings))
-        return false;
-    try { p.id = stoi(sId); } catch (...) { return false; }
-
-    p.nome = nome;
-    p.receita = nullptr;
-    stringstream si(ings);
-    string ing;
-    while (getline(si, ing, SEPARADOR_INGREDIENTE)) {
-        if (!ing.empty() && ing.back() == '\r') ing.pop_back();   // arquivos com CRLF
-        if (!ing.empty()) inserirIngredienteFim(p.receita, ing);
-    }
-    return true;
-}
 
 // CARGA NA AVL
 bool carregarPedidos(const string& arquivo, NoAVL*& raiz, EstatAVL& est) {
     ifstream arq(arquivo);
     if (!arq) return false;
 
-    auto t0 = chrono::steady_clock::now();
-    string linha;
-    while (getline(arq, linha)) {
-        Pedido p;
-        if (parsearLinhaPedido(linha, p)) raiz = inserirAVL(raiz, p, est.rotacoes);
-    }
-    auto t1 = chrono::steady_clock::now();
+    Timer cronometro;
+    timer_iniciar(&cronometro);
 
-    est.tempoCarga = chrono::duration<double>(t1 - t0).count();
-    est.nos = contarNosAVL(raiz);
+    string linhaId, linhaReceita;
+
+    while (getline(arq, linhaId)) {
+
+        if (!linhaId.empty() && linhaId.back() == '\r') linhaId.pop_back();
+        if (linhaId.empty()) continue;
+
+        try {
+            
+            if (!getline(arq, linhaReceita)) {
+                throw runtime_error("Arquivo de pedidos incompleto: esperava a linha da receita.");
+            }
+
+            if (!linhaReceita.empty() && linhaReceita.back() == '\r') linhaReceita.pop_back();
+
+            if (linhaReceita.empty()) {
+                throw runtime_error("Arquivo de pedidos incompleto: linha da receita está vazia.");
+            }
+
+            Pedido p;
+            p.id = stoi(linhaId);
+            p.receita = nullptr;
+
+            for (char ing : linhaReceita) {
+                inserirIngredienteFim(p.receita, ing);
+            }
+
+            raiz = inserirAVL(raiz, p, est.rotacoes);
+        }
+        catch (const exception&) {
+            return false;
+        }
+    }
+    est.tempoCarga = timer_parar(&cronometro);
+    est.nos = contarNosAVL(raiz);   // O(1): campo tam da raiz (duplicados não entram)
     est.altura = alturaAVL(raiz);
     return true;
 }

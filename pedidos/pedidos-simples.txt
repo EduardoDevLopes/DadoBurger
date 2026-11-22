@@ -1,0 +1,7 @@
+# EXEMPLO - substituir pelo pedidos.txt de desenvolvimento fornecido pelo professor
+# formato assumido: id;nome;ing1,ing2,...
+1;Simples;pao,carne,pao
+2;X-Burger;pao,carne,queijo,pao
+3;X-Salada;pao,carne,queijo,alface,tomate,pao
+4;Vegetariano;pao,alface,tomate,pao
+5;Duplo;pao,carne,queijo,carne,pao

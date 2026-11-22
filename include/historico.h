@@ -1,24 +1,33 @@
 #ifndef HISTORICO_H
 #define HISTORICO_H
-#include <vector>
 
-// HISTÓRICO DE PARTIDAS E ORDENAÇÃO O(n log n)
-struct Partida {
-    int id;
-    int pontuacao;
-    int tempoAtendimento;   // em turnos
+// HISTÓRICO DE PARTIDAS - LISTA CONTÍGUA (vetor dinâmico próprio)
+// ADAPTAÇÃO: o esqueleto usava std::vector<Partida> {id, pontuacao, tempo}. O enunciado
+// pede lista contígua alocada dinamicamente (acesso O(1) por índice) e registros
+// {nome, pontuação}; o vetor passou a ser próprio (dobra a capacidade).
+struct Entrada {
+    char nome[21];   // até 20 caracteres + '\0'
+    int pontos;
 };
 
-// Critério: devolve true se 'a' deve vir ANTES de 'b' na ordem final
-typedef bool (*CriterioPartida)(const Partida& a, const Partida& b);
+struct ListaContigua {
+    Entrada* v = nullptr;
+    int tam = 0;
+    int cap = 0;
+};
 
-bool maiorPontuacao(const Partida& a, const Partida& b);   // pontuação decrescente
-bool menorTempo(const Partida& a, const Partida& b);       // tempo crescente
+void inicializarLista(ListaContigua& l);
+void acrescentar(ListaContigua& l, const Entrada& e);   // O(1) amortizado
+void destruirLista(ListaContigua& l);
 
-// Ordena o histórico com Heap Sort (O(n log n) no pior caso, in-place, não estável)
-void ordenarHistorico(std::vector<Partida>& hist, CriterioPartida antes = maiorPontuacao);
+// Cópia independente (para ordenar sem alterar o original). O(n)
+Entrada* copiarVetor(const ListaContigua& l);
 
-// Ordena uma CÓPIA do histórico e devolve o tempo gasto, em segundos
-double medirOrdenacao(const std::vector<Partida>& hist, CriterioPartida antes = maiorPontuacao);
+// Lê o histórico (2 linhas por registro: nome, pontuação). Arquivo inexistente => lista
+// vazia. Retorna o número de entradas lidas
+int carregarHistorico(const char* arquivo, ListaContigua& l);
+
+// Acrescenta UMA entrada ao final do arquivo (as partidas anteriores são preservadas)
+bool anexarHistorico(const char* arquivo, const Entrada& e);
 
 #endif
