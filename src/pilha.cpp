@@ -24,6 +24,15 @@ void destruirPilha(Pilha& p) {
     while (popIngrediente(p)) {}
 }
 
+char topoIngrediente(const Pilha& p) { return p.topo ? p.topo->ing : '\0'; }
+
+int copiarPilha(const Pilha& p, char* buf, int cap) {
+    int n = 0;
+    for (const NoPilha* a = p.topo; a != nullptr && n < cap; a = a->prox) buf[n++] = a->ing;
+    for (int i = 0, j = n - 1; i < j; i++, j--) { char t = buf[i]; buf[i] = buf[j]; buf[j] = t; }
+    return n;
+}
+
 // VERIFICAÇÃO PILHA x LISTA
 bool verificarPedido(const Pilha& p, const NoIng* receita) {
     // Percorre topo -> base e inverte, para ficar na mesma ordem da receita

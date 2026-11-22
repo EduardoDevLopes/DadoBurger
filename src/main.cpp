@@ -1,4 +1,7 @@
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
+#include <random>
 #include <string>
 #include <random>
 #include "constants.h"
@@ -9,24 +12,28 @@
 using namespace std;
 
 // FUNÇÃO PRINCIPAL DO JOGO
+// Uso: ./dado_burger <pedidos> <historico> [semente]
 int main(int argc, char** argv) {
-    // INICIALIZAÇÃO
-    // Arquivo de pedidos: argv[1] (ex.: versão final) ou o padrão de constants.h
-    string arquivoPedidos = (argc > 1) ? argv[1] : ARQUIVO_PEDIDOS;
+    if (argc < 3) {
+        cerr << "Uso: " << argv[0] << " <pedidos> <historico> [semente]\n";
+        return 1;
+    }
 
+    // INICIALIZAÇÃO (antes do menu): pedidos -> AVL; histórico -> lista contígua
     Jogo jogo;
-    if (!iniciarJogo(jogo, arquivoPedidos)) {
-        cerr << "Erro: nao foi possivel abrir " << arquivoPedidos << "\n";
+    if (argc > 3) jogo.gerador.seed((unsigned)strtoul(argv[3], nullptr, 10));   // partidas repetíveis
+    else { random_device seed; jogo.gerador.seed(seed()); }
+
+    if (!iniciarJogo(jogo, argv[1], argv[2])) {
+        cerr << "Erro: nao foi possivel carregar pedidos de '" << argv[1] << "'\n";
         encerrarJogo(jogo);
         return 1;
     }
     cout << "Pedidos carregados: " << jogo.estatAVL.nos
          << " (altura " << jogo.estatAVL.altura
-         << ", rotacoes " << jogo.estatAVL.rotacoes << ")\n";
-
-    // Inicializa seed e o gerador de números aleatórios
-    random_device seed;
-    mt19937 geradorAleatorio(seed());
+         << ", rotacoes " << jogo.estatAVL.rotacoes
+         << ", " << jogo.estatAVL.tempoCarga << " s) | Historico: "
+         << jogo.entradasCarregadas << " entradas\n";
 
     EstadoJogo estadoAtual = ESTADO_MENU;
 
@@ -36,33 +43,15 @@ int main(int argc, char** argv) {
             case ESTADO_MENU:
                 desenharMenu();
                 atualizarMenu(estadoAtual);
-                if (estadoAtual == ESTADO_JOGANDO) reiniciarPartida(jogo);   // reset de uma partida
                 break;
 
             case ESTADO_JOGANDO:
-                // TODO: Game Loop (turnos, chegada de clientes, paciência, montagem,
-                // validade dos lotes, pontuação) e, ao fim, salvar Partida em jogo.historico
-                cout << "[Partida em construcao]\n";
+                executarPartida(jogo);   // partida completa + relatório + histórico
+                estadoAtual = ESTADO_MENU;
+                break;
 
-
-                // ---------------------------------------------------------------------------
-                // PARTE DO PEDIDO - temporariamente na main
-                {
-
-                    // Sorteia o pedido
-                    int pedidoId = sortearPedido(geradorAleatorio, 1, jogo.estatAVL.nos);
-
-                    // busca pedido
-                    int comp = 0;
-                    const Pedido *pedido = buscarHash(jogo.cache, pedidoId, jogo.indice, comp);
-
-                    // imprime pedido
-                    imprimirPedido(*pedido);
-                
-                }
-                // FIM DA PARTE DO PEDIDO
-                // ---------------------------------------------------------------------------
-                
+            case ESTADO_COMO_JOGAR:
+                desenharComoJogar();
                 estadoAtual = ESTADO_MENU;
                 break;
 

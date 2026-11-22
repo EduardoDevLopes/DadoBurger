@@ -1,7 +1,7 @@
 #include "carga.h"
-#include <chrono>
+#include "timer.hpp"
 #include <fstream>
-#include <sstream>
+#include <stdexcept>
 #include "constants.h"
 
 using namespace std;
@@ -11,7 +11,8 @@ bool carregarPedidos(const string& arquivo, NoAVL*& raiz, EstatAVL& est) {
     ifstream arq(arquivo);
     if (!arq) return false;
 
-    auto t0 = chrono::steady_clock::now();
+    Timer cronometro;
+    timer_iniciar(&cronometro);
 
     string linhaId, linhaReceita;
 
@@ -42,15 +43,12 @@ bool carregarPedidos(const string& arquivo, NoAVL*& raiz, EstatAVL& est) {
 
             raiz = inserirAVL(raiz, p, est.rotacoes);
         }
-        catch (const exception& e) {
+        catch (const exception&) {
             return false;
         }
     }
-    auto t1 = chrono::steady_clock::now();
-
-    est.tempoCarga = chrono::duration<double>(t1 - t0).count();
-    // TODO: contar nós (e talvez altura) da AVL durante a inserção dos nodos, para não precisar percorrer a árvore novamente
-    est.nos = contarNosAVL(raiz);
+    est.tempoCarga = timer_parar(&cronometro);
+    est.nos = contarNosAVL(raiz);   // O(1): campo tam da raiz (duplicados não entram)
     est.altura = alturaAVL(raiz);
     return true;
 }

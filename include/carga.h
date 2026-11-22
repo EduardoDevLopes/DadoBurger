@@ -4,16 +4,13 @@
 #include "avl.h"
 #include "pedido.h"
 
-// CARGA DO ARQUIVO pedidos.txt
-// Formato assumido (1 pedido por linha): id;nome;ing1,ing2,ing3
-// Linhas vazias ou iniciadas por '#' são ignoradas.
-// Se o formato real for outro, só parsearLinhaPedido() precisa mudar.
-
-// Converte uma linha em Pedido (receita alocada com new). Retorna false se inválida
-bool parsearLinhaPedido(const std::string& linha, Pedido& p);
+// CARGA DO ARQUIVO DE PEDIDOS
+// Formato (2 linhas por pedido): 1ª linha = código inteiro único; 2ª = receita (5 a 7
+// símbolos da Tabela 1, de baixo para cima, terminando em 'z'). Linhas vazias entre os
+// pedidos são ignoradas. O tamanho do arquivo não é assumido.
 
 // Lê o arquivo inteiro e insere cada pedido na AVL, preenchendo as métricas de carga
-// (nós, altura, rotações e tempo). Retorna false se o arquivo não abrir
+// (nós, altura, rotações e tempo). Retorna false se o arquivo não abrir ou estiver malformado
 bool carregarPedidos(const std::string& arquivo, NoAVL*& raiz, EstatAVL& est);
 
 #endif
