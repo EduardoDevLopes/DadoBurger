@@ -6,6 +6,7 @@
 // PILHA (LIFO) - chapa de montagem do hambúrguer
 struct NoPilha {
     char ing;
+    char ing;
     NoPilha* prox;
 };
 
@@ -15,6 +16,7 @@ struct Pilha {
 };
 
 // Empilha um ingrediente. Complexidade O(1)
+void pushIngrediente(Pilha& p, const char& ing);
 void pushIngrediente(Pilha& p, const char& ing);
 
 // Desempilha o topo (correção de erro). Retorna false se estava vazia.

@@ -3,9 +3,11 @@
 #include <iostream>
 #include <random>
 #include <string>
+#include <random>
 #include "constants.h"
 #include "jogo.h"
 #include "menu.h"
+#include "pedido.h"
 
 using namespace std;
 
