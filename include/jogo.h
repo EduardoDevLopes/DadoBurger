@@ -47,8 +47,10 @@ struct Jogo {
     EstatOrdenacao estatOrd;          // métricas da ordenação do histórico
     int entradasCarregadas = 0;       // tamanho do histórico logo após a carga
     int numPartida = 0;               // partidas jogadas na sessão
-    std::mt19937 gerador;             // sorteio dos pedidos
     FILE* log = nullptr;              // medicoes.log
+
+    // mt19937 é uma classe que contem um algoritmo para gerar numeros pseudoaleatórios a partir de uma seed dada
+    std::mt19937 gerador;             // gerador para sorteio de pedidos
 };
 
 // Carrega pedidos na AVL e o histórico na lista contígua, prepara o cache e abre o log.

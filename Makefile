@@ -4,7 +4,7 @@ CXXFLAGS := -std=c++17 -Wall -Wextra -O2 -Iinclude
 # nome do enunciado; o executável fica na raiz, junto dos arquivos de entrada
 BIN      := dado_burger
 
-SRC      := $(wildcard src/*.cpp)
+SRC      := $(filter-out src/testes.cpp,$(wildcard src/*.cpp))
 OBJ      := $(patsubst src/%.cpp,build/%.o,$(SRC))
 LIB_OBJ  := $(filter-out build/main.o,$(OBJ))
 

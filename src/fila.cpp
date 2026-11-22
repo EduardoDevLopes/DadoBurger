@@ -1,4 +1,5 @@
 #include "fila.h"
+#include <iostream>
 
 using namespace std;
 
@@ -24,6 +25,15 @@ bool desenfileirarCliente(Fila& f, Cliente& out) {
 
 // PACIÊNCIA (só o cliente da frente)
 Cliente* frenteFila(Fila& f) { return f.ini ? &f.ini->c : nullptr; }
+
+void imprimirFila(const Fila& f) {
+    for (const NoFila* atual = f.ini; atual != nullptr; atual = atual->prox) {
+        const Cliente& cliente = atual->c;
+        cout << "Cliente id: " << cliente.id
+             << ", Cliente pedido id:  " << cliente.idPedido
+             << " , Cliente paciencia " << cliente.paciencia << endl;
+    }
+}
 
 int reduzirPacienciaFrente(Fila& f) {
     if (f.ini == nullptr) return -1;

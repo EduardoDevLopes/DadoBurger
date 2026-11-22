@@ -91,12 +91,18 @@ static void imprimirEstoque(const Partida& p, bool detalhado) {
 static void desenharTurno(Jogo& j) {
     Partida& p = j.partida;
     Cliente* c = frenteFila(p.balcao);
+
     printf("\n------------------------------------------------------------\n");
     printf("Turno %d | Cliente %d/%d | Atendidos: %d | Na fila: %d\n", p.turno, p.clienteAtual, NUM_CLIENTES, p.pontuacao, p.balcao.tam);
-    printf("Paciencia do cliente: %d/%d\n", c->paciencia, PACIENCIA_INICIAL);
-    printf("Pedido  (base > topo): "); imprimirReceita(p.pedido->receita);
+    if (c != nullptr) printf("Paciencia do cliente: %d/%d\n", c->paciencia, PACIENCIA_INICIAL);
+    if (p.pedido != nullptr) 
+    {
+        printf("Pedido  (base > topo): "); 
+        imprimirReceita(p.pedido->receita);
+    }
     printf("Prato   (base > topo): [pao]");
-    char buf[64]; int n = copiarPilha(p.chapa, buf, 64);
+    char buf[64]; 
+    int n = copiarPilha(p.chapa, buf, 64);
     for (int i = 0; i < n; i++) printf(" %c", buf[i]);
     printf("\n");
     imprimirEstoque(p, false);
@@ -136,7 +142,7 @@ void executarPartida(Jogo& j) {
             case 'e': case 'E': printf("\n"); imprimirEstoque(p, true); snprintf(p.msg, sizeof p.msg, "(consulta: nao consumiu turno) "); break;
             case 'o': case 'O': printf("\nPedido: "); imprimirReceita(p.pedido->receita); snprintf(p.msg, sizeof p.msg, "(consulta: nao consumiu turno) "); break;
             case '?': case 'h': case 'H':
-                snprintf(p.msg, sizeof p.msg, "p X preparar | a X adicionar | r remover topo | e estoque | o pedido | s sair. Simbolos: z k m p a s q c t n o b. "); break;
+                snprintf(p.msg, sizeof p.msg, "p <simbolo> preparar | a <simbolo> adicionar | r remover topo | e estoque | o pedido | s sair. Simbolos: z k m p a s q c t n o b. "); break;
             case 's': case 'S': acaoSair(j); break;
             default: snprintf(p.msg, sizeof p.msg, "Comando desconhecido. Digite ? para ajuda. "); break;
         }

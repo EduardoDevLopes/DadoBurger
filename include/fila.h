@@ -28,6 +28,9 @@ bool desenfileirarCliente(Fila& f, Cliente& out);
 // Cliente da frente (nullptr se vazia). O(1)
 Cliente* frenteFila(Fila& f);
 
+// Imprime os clientes da frente ao final sem alterar a fila. O(n)
+void imprimirFila(const Fila& f);
+
 // ADAPTAÇÃO: o esqueleto decrementava a paciência de TODOS os clientes; o enunciado
 // (§3.3) diz que só o da frente perde paciência. Decrementa 1 turno do cliente da frente
 // e devolve a paciência restante (-1 se a fila está vazia). O(1)

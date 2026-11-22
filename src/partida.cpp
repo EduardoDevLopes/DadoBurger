@@ -1,7 +1,6 @@
 #include "partida.h"
 #include "constants.h"
-#include <cstdio>
-#include <cstring>
+#include <iostream>
 
 using namespace std;
 
@@ -24,14 +23,33 @@ int validadeDe(char s) { return s == 'n' ? VALIDADE_CARNE : s == 'o' ? VALIDADE_
 int quantidadeEstoque(const Partida& p, char s) {
 }
 
-// SORTEIO + CACHE + AVL
-// Sorteia uma POSIÇÃO k entre os n pedidos existentes e pega o k-ésimo id na AVL (O(log n));
-// depois consulta o cache (hit) ou a AVL (miss, cronometrada e contada em estatAVL).
-static void sortearEBuscarPedido(Jogo& j) {
+static void inicializaFilaClientes(Jogo& j) {
+    
+    for (int i = 1; i <= NUM_CLIENTES; i++)
+    {
+        Cliente cliente;
+        cliente.id = i;
+        if (j.indice->tam > 0) cliente.idPedido = sortearPedido(j.gerador, 1, j.indice->tam);
+        else {
+            cliente.idPedido = 0;
+            cerr << "Aviso! Número de pedidos encontrados: 0.";
+        }
+        cliente.paciencia = PACIENCIA_INICIAL;
+
+        enfileirarCliente(j.partida.balcao, cliente);
+    }
 }
 
 // PARTIDA
 void iniciarPartida(Jogo& j) {
+
+    // Inicializa a fila de clientes
+    inicializaFilaClientes(j);
+
+    // Define cliente e pedido atual
+    Cliente* clienteAtual = frenteFila(j.partida.balcao);
+    j.partida.clienteAtual = clienteAtual->id;
+    j.partida.pedido = buscarHash(j.cache, clienteAtual->idPedido, j.indice, j.estatAVL);
 }
 
 // Início de cada turno, ANTES da ação: descarta vencidos no topo de cada heap

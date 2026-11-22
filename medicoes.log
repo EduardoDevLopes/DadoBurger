@@ -1,0 +1,9 @@
+=== MEDICOES - DADO BURGER ===
+-- AVL: carregamento --
+Nos inseridos:           837253
+Altura resultante:       20
+Rotacoes (insercao):     837233
+Tempo de carregamento:   0.358838 s
+-- Historico: carregamento --
+Entradas carregadas:     1
+

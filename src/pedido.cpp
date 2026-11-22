@@ -11,7 +11,7 @@ int sortearPedido(mt19937 &geradorAleatorio, int min, int max) {
 }
 
 void imprimirPedido(const Pedido& pedido) {
-    cout << "Pedido sorteado: id: " << pedido.id << ", receita: ";
+    cout << "Pedido: id: " << pedido.id << ", receita: ";
     if (pedido.receita == nullptr) {
         cout << "(vazia)";
     } else {
