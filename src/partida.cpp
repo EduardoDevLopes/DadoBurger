@@ -108,8 +108,16 @@ bool acaoAdicionar(Jogo& j, char s) {
     return true;
 }
 
+// REMOVER TOPO: desempilha e DESCARTA (não volta ao estoque). Consome 1 turno.
 bool acaoRemoverTopo(Jogo& j) {
+    Partida& p = j.partida;
+    p.msg[0] = '\0';
+    char r;
+    if (!popIngrediente(p.chapa, &r)) { snprintf(p.msg, sizeof p.msg, "O prato esta vazio. "); return false; }
+    snprintf(p.msg, sizeof p.msg, "Descartou %s do topo. ", nomeIngrediente(r));
+    fimDeAcao(j, false);
     return true;
 }
+
 
 void acaoSair(Jogo& j) { j.partida.estado = SAIDA_VOLUNTARIA; }
