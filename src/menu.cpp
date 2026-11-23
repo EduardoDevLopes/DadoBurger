@@ -139,29 +139,28 @@ void executarPartida(Jogo& j) {
             case 'p': 
             case 'P': 
                 if (!arg) snprintf(p.msg, sizeof p.msg, "Use: p <simbolo>. "); 
-                else {
-                    if (acaoPreparar(j, arg)) {
-                        cout << "Ingrediente " << arg << " foi preparado." << endl;
-                    }
-                    else {
-                        cout << "Nao foi possivel preparar o ingrediente " << arg << "." << endl;
-                        cout << "Escolha um ingrediente perene ou perecivel." << endl;
-                        cout << "Ingredientes perenes: queijo suico, queijo cheddar, cebola, tomate." << endl;
-                        cout << "Ingredientes pereciveis: carne, ovo frito, bacon." << endl;
-                    }
-                }
+                else acaoPreparar(j, arg);
                 break;
             case 'a': 
             case 'A': 
                 if (!arg) snprintf(p.msg, sizeof p.msg, "Use: a <simbolo>. "); 
                 else {
                     if (acaoAdicionar(j, arg)) {
-                        cout << "Ingrediente " << arg << " foi adicionado." << endl;
-                    }
-                    else {
-                        cout << "Nao foi possivel adicionar o ingrediente " << arg << "." << endl;
-                        cout << "AVISO: verifique se o simbolo existe." << endl;
-                        cout << "Ingredientes pereciveis ou perenes precisam estar preparados no estoque; ingredientes simples nao precisam." << endl;
+                        
+                        // caso escolha z (pão de cima) - finalização do pedido
+                        if (arg ==  'z') {
+
+                            // Pergunta se deseja finalizar o pedido
+                            cout << "Deseja finalizar o pedido? (s/n)" << endl;
+                            
+                            char buf[10];
+                            char finalizar = '\0';
+                            if (lerLinha(buf, sizeof buf) && sscanf(buf, " %c", &finalizar) == 1) {
+                                if (finalizar == 's' || finalizar == 'S') {
+                                    finalizarPedido(j);
+                                }
+                            }
+                        }
                     }
                 } 
                 break;

@@ -40,6 +40,15 @@ static void inicializarFilaClientes(Jogo& j) {
     }
 }
 
+// Define cliente e pedido atual
+static void atualizaClienteAtual(Jogo& j) {
+
+    Cliente* clienteAtual = frenteFila(j.partida.balcao);
+    j.partida.clienteAtual = clienteAtual->id;
+    j.partida.pedido = buscarHash(j.cache, clienteAtual->idPedido, j.indice, j.estatAVL);
+
+}
+
 // PARTIDA
 void iniciarPartida(Jogo& j) {
 
@@ -47,9 +56,7 @@ void iniciarPartida(Jogo& j) {
     inicializarFilaClientes(j);
 
     // Define cliente e pedido atual
-    Cliente* clienteAtual = frenteFila(j.partida.balcao);
-    j.partida.clienteAtual = clienteAtual->id;
-    j.partida.pedido = buscarHash(j.cache, clienteAtual->idPedido, j.indice, j.estatAVL);
+    atualizaClienteAtual(j);
 }
 
 // Início de cada turno, ANTES da ação: descarta vencidos no topo de cada heap
@@ -68,6 +75,8 @@ bool acaoPreparar(Jogo& j, char s) {
     if (indiceP != -1) 
     {
         j.partida.estoque.perenes[indiceP]++;
+
+        snprintf(j.partida.msg, sizeof j.partida.msg, "Ingrediente foi preparado.");
         return true;
     }
 
@@ -81,30 +90,48 @@ bool acaoPreparar(Jogo& j, char s) {
 
         inserirLoteHeap(*heapDoIngrediente(j.partida.estoque, s), lote);
 
+        snprintf(j.partida.msg, sizeof j.partida.msg, "Ingrediente foi preparado.");
         return true;
     }
 
+    snprintf(j.partida.msg, sizeof j.partida.msg, "Nao foi possivel preparar o ingrediente");
     return false;
 }
 
 bool acaoAdicionar(Jogo& j, char s) {
 
     // verificar se é possível adicionar o ingrediente
-    if (!ingredienteValido(s)) return false;
+    if (!ingredienteValido(s)) {
+        snprintf(j.partida.msg, sizeof j.partida.msg, "Ingrediente invalido.");
+        return false;
+    }
+
+    // verifica se o ingrediente do topo NÃO é o pão de cima
+    if (topoIngrediente(j.partida.chapa) == 'z') {
+        snprintf(j.partida.msg, sizeof j.partida.msg, "Nao e possivel adicionar ingredientes por cima do pao de cima.");
+        return false;
+    }
 
     int indiceP = indicePerene(s);
     if (indiceP != -1) {
-        if (j.partida.estoque.perenes[indiceP] < 1) return false; // sem ingrediente no estoque
+        if (j.partida.estoque.perenes[indiceP] < 1) {
+            snprintf(j.partida.msg, sizeof j.partida.msg, "Nao foi possivel adicionar o ingrediente. Ingredientes perenes precisam estar preparados no estoque.");
+            return false;
+        }
 
         j.partida.estoque.perenes[indiceP]--;   // ingrediente é utilizado
     }
     else if (ehPerecivel(s)) {
         Lote lote;
-        if (!removerTopoHeap(*heapDoIngrediente(j.partida.estoque, s), lote)) return false;
+        if (!removerTopoHeap(*heapDoIngrediente(j.partida.estoque, s), lote)) {
+            snprintf(j.partida.msg, sizeof j.partida.msg, "Nao foi possivel adicionar o ingrediente. Ingredientes pereciveis precisam estar preparados no estoque.");
+            return false;
+        } 
     }
 
     pushIngrediente(j.partida.chapa, s);
 
+    snprintf(j.partida.msg, sizeof j.partida.msg, "Ingrediente adicionado.");
     return true;
 }
 
@@ -119,5 +146,37 @@ bool acaoRemoverTopo(Jogo& j) {
     return true;
 }
 
-
 void acaoSair(Jogo& j) { j.partida.estado = SAIDA_VOLUNTARIA; }
+
+// FINALIZAR PEDIDO: 
+// verifica se o pedido está correto
+// remove o cliente atual da fila
+// passa o próximo cliente para o inicio da fila
+// reseta a pilha de ingredientes
+// atualiza a pontuação
+bool finalizarPedido(Jogo& j) {
+
+    Partida& p = j.partida;
+
+    // verificar se o pedido está correto
+    if (!verificarPedido(p.chapa, p.pedido->receita)) {
+        snprintf(p.msg, sizeof p.msg, "Pedido incorreto.");
+        return false;
+    }
+
+    // limpa o prato (remove ingredientes da pilha)
+    destruirPilha(j.partida.chapa);
+
+    // remover o cliente atual da fila
+    Cliente clienteRemovido;
+    desenfileirarCliente(j.partida.balcao, clienteRemovido);
+
+    // passar o próximo cliente para o inicio da fila
+    atualizaClienteAtual(j);
+
+    // atualiza pontuação
+    j.partida.pontuacao++;
+
+    snprintf(p.msg, sizeof p.msg, "Pedido finalizado!");
+    return true;
+}

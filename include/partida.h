@@ -21,5 +21,6 @@ bool acaoPreparar(Jogo& j, char simbolo);
 bool acaoAdicionar(Jogo& j, char simbolo);
 bool acaoRemoverTopo(Jogo& j);
 void acaoSair(Jogo& j);
+bool finalizarPedido(Jogo& j);
 
 #endif
