@@ -1,6 +1,8 @@
 #include "partida.h"
 #include "constants.h"
+#include <cstdio>
 #include <iostream>
+#include <cstring>
 
 using namespace std;
 
@@ -20,7 +22,26 @@ bool ehPerecivel(char s) { return s == 'n' || s == 'o' || s == 'b'; }
 bool requerPreparo(char s) { return ehPerecivel(s) || indicePerene(s) >= 0; }
 int validadeDe(char s) { return s == 'n' ? VALIDADE_CARNE : s == 'o' ? VALIDADE_OVO : VALIDADE_BACON; }
 
+// Quantidade em estoque de um ingrediente (usada em testes e na lógica de estoque)
 int quantidadeEstoque(const Partida& p, char s) {
+    if (ehPerecivel(s)) {
+        int i = s == 'n' ? 0 : s == 'o' ? 1 : 2;
+        return p.estoque.heaps[i].tam;
+    }
+    if (indicePerene(s) >= 0) return p.estoque.perenes[indicePerene(s)];
+    return -1;
+}
+
+
+// SORTEIO + CACHE + AVL
+// Sorteia uma POSIÇÃO k entre os n pedidos existentes e pega o k-ésimo id na AVL (O(log n));
+// depois consulta o cache (hit) ou a AVL (miss, cronometrada e contada em estatAVL).
+static void sortearEBuscarPedido(Jogo& j) {
+    Partida& p = j.partida;
+    int k = sortearPedido(j.gerador, 0, contarNosAVL(j.indice) - 1);   // posição aleatória
+    int id = selecionarAVL(j.indice, k)->p.id;                         // código do k-ésimo pedido
+    p.pedido = buscarHash(j.cache, id, j.indice, j.estatAVL);          // cache -> (miss) AVL
+    frenteFila(p.balcao)->idPedido = id;                               // anota no cliente da frente
 }
 
 static void inicializarFilaClientes(Jogo& j) {
@@ -61,10 +82,41 @@ void iniciarPartida(Jogo& j) {
 
 // Início de cada turno, ANTES da ação: descarta vencidos no topo de cada heap
 static void inicioDeTurno(Jogo& j) {
+    static const char* nomes[3] = {"carne", "ovo frito", "bacon"};
+    Partida& p = j.partida;
+    int desc[3];
+    removerVencidosEstoque(p.estoque, p.turno, desc);
+    for (int i = 0; i < 3; i++) {
+        if (desc[i] > 0) {
+            size_t n = strlen(p.msg);
+            snprintf(p.msg + n, sizeof p.msg - n, "%d %s venceu(ram) e foi(ram) descartado(s). ", desc[i], nomes[i]);
+        }
+    }
 }
 
-// Fim de uma ação válida: pedido concluído? paciência? próximo turno
-static void fimDeAcao(Jogo& j, bool concluiu) { 
+// Fim de uma ação válida (chamada por preparar/adicionar/remover):
+//   concluiu == true  : cliente atendido (pontua, sai da fila, prato é descartado). Se a fila
+//                       esvaziou => VITÓRIA; senão sorteia o pedido do próximo.
+//                       A ação que conclui o pedido NÃO reduz paciência.
+//   concluiu == false : reduz a paciência do cliente da frente; <= 0 => DERROTA.
+// Se o jogo continua, avança o turno e roda o descarte de perecíveis.
+static void fimDeAcao(Jogo& j, bool concluiu) {
+    Partida& p = j.partida;
+    if (concluiu) {
+        p.pontuacao++;
+        Cliente atendido;
+        desenfileirarCliente(p.balcao, atendido);
+        destruirPilha(p.chapa);
+        if (p.balcao.tam == 0) { p.estado = VITORIA; return; }
+        p.clienteAtual++;
+        sortearEBuscarPedido(j);
+        snprintf(p.msg, sizeof p.msg, "Cliente atendido! Proximo cliente na frente. ");
+    } else if (reduzirPacienciaFrente(p.balcao) <= 0) {
+        p.estado = DERROTA;
+        return;
+    }
+    p.turno++;
+    inicioDeTurno(j);
 }
 
 bool acaoPreparar(Jogo& j, char s) {
