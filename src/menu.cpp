@@ -136,8 +136,35 @@ void executarPartida(Jogo& j) {
         char cmd = 0, arg = 0;
         sscanf(b, " %c %c", &cmd, &arg);
         switch (cmd) {
-            case 'p': case 'P': if (!arg) snprintf(p.msg, sizeof p.msg, "Use: p <simbolo>. "); else acaoPreparar(j, arg); break;
-            case 'a': case 'A': if (!arg) snprintf(p.msg, sizeof p.msg, "Use: a <simbolo>. "); else acaoAdicionar(j, arg); break;
+            case 'p': 
+            case 'P': 
+                if (!arg) snprintf(p.msg, sizeof p.msg, "Use: p <simbolo>. "); 
+                else {
+                    if (acaoPreparar(j, arg)) {
+                        cout << "Ingrediente " << arg << " foi preparado." << endl;
+                    }
+                    else {
+                        cout << "Nao foi possivel preparar o ingrediente " << arg << "." << endl;
+                        cout << "Escolha um ingrediente perene ou perecivel." << endl;
+                        cout << "Ingredientes perenes: queijo suico, queijo cheddar, cebola, tomate." << endl;
+                        cout << "Ingredientes pereciveis: carne, ovo frito, bacon." << endl;
+                    }
+                }
+                break;
+            case 'a': 
+            case 'A': 
+                if (!arg) snprintf(p.msg, sizeof p.msg, "Use: a <simbolo>. "); 
+                else {
+                    if (acaoAdicionar(j, arg)) {
+                        cout << "Ingrediente " << arg << " foi adicionado." << endl;
+                    }
+                    else {
+                        cout << "Nao foi possivel adicionar o ingrediente " << arg << "." << endl;
+                        cout << "AVISO: verifique se o simbolo existe." << endl;
+                        cout << "Ingredientes pereciveis ou perenes precisam estar preparados no estoque; ingredientes simples nao precisam." << endl;
+                    }
+                } 
+                break;
             case 'r': case 'R': acaoRemoverTopo(j); break;
             case 'e': case 'E': printf("\n"); imprimirEstoque(p, true); snprintf(p.msg, sizeof p.msg, "(consulta: nao consumiu turno) "); break;
             case 'o': case 'O': printf("\nPedido: "); imprimirReceita(p.pedido->receita); snprintf(p.msg, sizeof p.msg, "(consulta: nao consumiu turno) "); break;

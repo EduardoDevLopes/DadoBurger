@@ -23,7 +23,7 @@ int validadeDe(char s) { return s == 'n' ? VALIDADE_CARNE : s == 'o' ? VALIDADE_
 int quantidadeEstoque(const Partida& p, char s) {
 }
 
-static void inicializaFilaClientes(Jogo& j) {
+static void inicializarFilaClientes(Jogo& j) {
     
     for (int i = 1; i <= NUM_CLIENTES; i++)
     {
@@ -44,7 +44,7 @@ static void inicializaFilaClientes(Jogo& j) {
 void iniciarPartida(Jogo& j) {
 
     // Inicializa a fila de clientes
-    inicializaFilaClientes(j);
+    inicializarFilaClientes(j);
 
     // Define cliente e pedido atual
     Cliente* clienteAtual = frenteFila(j.partida.balcao);
@@ -61,10 +61,50 @@ static void fimDeAcao(Jogo& j, bool concluiu) {
 }
 
 bool acaoPreparar(Jogo& j, char s) {
-    return true;
+
+    // Perenes: queijo suíço, queijo cheddar, cebola, tomate. 
+    // Cada ação de preparo produz uma unidade no estoque. Uma vez preparados, aguardam indefinidamente.
+    int indiceP = indicePerene(s);
+    if (indiceP != -1) 
+    {
+        j.partida.estoque.perenes[indiceP]++;
+        return true;
+    }
+
+    // Perecíveis: carne, ovo frito, bacon. 
+    // Uma vez preparados, devem ser descartados após um número de turnos definido
+    if (ehPerecivel(s)) 
+    {
+        Lote lote;
+        lote.ingrediente = s;
+        lote.turnoVencimento = validadeDe(s);
+
+        inserirLoteHeap(*heapDoIngrediente(j.partida.estoque, s), lote);
+
+        return true;
+    }
+
+    return false;
 }
 
 bool acaoAdicionar(Jogo& j, char s) {
+
+    // verificar se é possível adicionar o ingrediente
+    if (!ingredienteValido(s)) return false;
+
+    int indiceP = indicePerene(s);
+    if (indiceP != -1) {
+        if (j.partida.estoque.perenes[indiceP] < 1) return false; // sem ingrediente no estoque
+
+        j.partida.estoque.perenes[indiceP]--;   // ingrediente é utilizado
+    }
+    else if (ehPerecivel(s)) {
+        Lote lote;
+        if (!removerTopoHeap(*heapDoIngrediente(j.partida.estoque, s), lote)) return false;
+    }
+
+    pushIngrediente(j.partida.chapa, s);
+
     return true;
 }
 
