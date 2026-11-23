@@ -94,13 +94,13 @@ static void desenharTurno(Jogo& j) {
 
     printf("\n------------------------------------------------------------\n");
     printf("Turno %d | Cliente %d/%d | Atendidos: %d | Na fila: %d\n", p.turno, p.clienteAtual, NUM_CLIENTES, p.pontuacao, p.balcao.tam);
-    if (c != nullptr) printf("Paciencia do cliente: %d/%d\n", c->paciencia, PACIENCIA_INICIAL);
+    if (c != nullptr) printf("\nPaciencia do cliente: %d/%d\n", c->paciencia, PACIENCIA_INICIAL);
     if (p.pedido != nullptr) 
     {
-        printf("Pedido  (base > topo): "); 
+        printf("\nPedido  (base > topo): "); 
         imprimirReceita(p.pedido->receita);
     }
-    printf("Prato   (base > topo): [pao]");
+    printf("\nPrato   (base > topo): [pao]");
     char buf[64]; 
     int n = copiarPilha(p.chapa, buf, 64);
     for (int i = 0; i < n; i++) printf(" %c", buf[i]);
