@@ -183,7 +183,17 @@ bool acaoAdicionar(Jogo& j, char s) {
 
     pushIngrediente(j.partida.chapa, s);
 
-    snprintf(j.partida.msg, sizeof j.partida.msg, "Ingrediente adicionado.");
+    if (s == 'z') {
+        bool correto = verificarPedido(j.partida.chapa, j.partida.pedido->receita);
+        fimDeAcao(j, correto);
+        if (!correto) {
+            snprintf(j.partida.msg, sizeof j.partida.msg, "Pao de cima colocado, mas o pedido esta incorreto! ");
+        }
+    } else {
+        snprintf(j.partida.msg, sizeof j.partida.msg, "Ingrediente adicionado.");
+        fimDeAcao(j, false);
+    }
+
     return true;
 }
 
@@ -199,36 +209,3 @@ bool acaoRemoverTopo(Jogo& j) {
 }
 
 void acaoSair(Jogo& j) { j.partida.estado = SAIDA_VOLUNTARIA; }
-
-// FINALIZAR PEDIDO: 
-// verifica se o pedido está correto
-// remove o cliente atual da fila
-// passa o próximo cliente para o inicio da fila
-// reseta a pilha de ingredientes
-// atualiza a pontuação
-bool finalizarPedido(Jogo& j) {
-
-    Partida& p = j.partida;
-
-    // verificar se o pedido está correto
-    if (!verificarPedido(p.chapa, p.pedido->receita)) {
-        snprintf(p.msg, sizeof p.msg, "Pedido incorreto.");
-        return false;
-    }
-
-    // limpa o prato (remove ingredientes da pilha)
-    destruirPilha(j.partida.chapa);
-
-    // remover o cliente atual da fila
-    Cliente clienteRemovido;
-    desenfileirarCliente(j.partida.balcao, clienteRemovido);
-
-    // passar o próximo cliente para o inicio da fila
-    atualizaClienteAtual(j);
-
-    // atualiza pontuação
-    j.partida.pontuacao++;
-
-    snprintf(p.msg, sizeof p.msg, "Pedido finalizado!");
-    return true;
-}

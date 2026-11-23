@@ -57,7 +57,7 @@ void desenharComoJogar() {
     printf("  (p 'X')  preparar o ingrediente X (so os que exigem preparo)\n");
     printf("  (a 'X')  adicionar o ingrediente X ao hamburguer (empilha)\n");
     printf("  (r)      remover o ingrediente do topo (e descartado)\n\n");
-    printf("Consultas (nao consomem turno): \ne = estoque detalhado, \no = pedido, \n? = ajuda");
+    printf("Consultas (nao consomem turno):\no = pedido, \n? = ajuda");
     printf("  \ns = desistir da partida\n\n");
     printf("Paciencia:cada cliente aguarda %d turnos, mas so a do cliente da frente diminui.\n", PACIENCIA_INICIAL);
     printf("Derrota : a paciencia do cliente da frente chega a zero (pontuacao = clientes atendidos).\n");
@@ -73,19 +73,10 @@ static void imprimirReceita(const NoIng* r) {
     printf("\n");
 }
 
-static void imprimirEstoque(const Partida& p, bool detalhado) {
+static void imprimirEstoque(const Partida& p) {
     printf("Estoque:\nqueijo suico(s)=%d \ncheddar(q)=%d \ncebola(c)=%d \ntomate(t)=%d \ncarne(n)=%d \novo(o)=%d \nbacon(b)=%d\n\n",
            p.estoque.perenes[0], p.estoque.perenes[1], p.estoque.perenes[2], p.estoque.perenes[3],
            p.estoque.heaps[0].tam, p.estoque.heaps[1].tam, p.estoque.heaps[2].tam);
-    if (detalhado) {
-        static const char* nm[3] = {"carne", "ovo frito", "bacon"};
-        for (int i = 0; i < 3; i++) {
-            const Heap& h = p.estoque.heaps[i];
-            if (h.tam > 0) printf("  %s: %d un., a mais antiga vence no turno %d (turno atual %d)\n", nm[i], h.tam, h.v[0].turnoVencimento, p.turno);
-            else printf("  %s: 0 un.\n", nm[i]);
-        }
-        printf("  Nao pereciveis infinitos: z k m p a\n");
-    }
 }
 
 static void desenharTurno(Jogo& j) {
@@ -105,7 +96,7 @@ static void desenharTurno(Jogo& j) {
     int n = copiarPilha(p.chapa, buf, 64);
     for (int i = 0; i < n; i++) printf(" %c", buf[i]);
     printf("\n");
-    imprimirEstoque(p, false);
+    imprimirEstoque(p);
     if (p.msg[0]) printf(">> %s\n", p.msg);
 }
 
@@ -144,31 +135,12 @@ void executarPartida(Jogo& j) {
             case 'a': 
             case 'A': 
                 if (!arg) snprintf(p.msg, sizeof p.msg, "Use: a <simbolo>. "); 
-                else {
-                    if (acaoAdicionar(j, arg)) {
-                        
-                        // caso escolha z (pão de cima) - finalização do pedido
-                        if (arg ==  'z') {
-
-                            // Pergunta se deseja finalizar o pedido
-                            cout << "Deseja finalizar o pedido? (s/n)" << endl;
-                            
-                            char buf[10];
-                            char finalizar = '\0';
-                            if (lerLinha(buf, sizeof buf) && sscanf(buf, " %c", &finalizar) == 1) {
-                                if (finalizar == 's' || finalizar == 'S') {
-                                    finalizarPedido(j);
-                                }
-                            }
-                        }
-                    }
-                } 
+                else acaoAdicionar(j, arg);
                 break;
             case 'r': case 'R': acaoRemoverTopo(j); break;
-            case 'e': case 'E': printf("\n"); imprimirEstoque(p, true); snprintf(p.msg, sizeof p.msg, "(consulta: nao consumiu turno) "); break;
             case 'o': case 'O': printf("\nPedido: "); imprimirReceita(p.pedido->receita); snprintf(p.msg, sizeof p.msg, "(consulta: nao consumiu turno) "); break;
             case '?': case 'h': case 'H':
-                snprintf(p.msg, sizeof p.msg, "p <simbolo> preparar | a <simbolo> adicionar | r remover topo | e estoque | o pedido | s sair. Simbolos: z k m p a s q c t n o b. "); break;
+                snprintf(p.msg, sizeof p.msg, "p <simbolo> preparar | a <simbolo> adicionar | r remover topo | o pedido | s sair. Simbolos: z k m p a s q c t n o b. "); break;
             case 's': case 'S': acaoSair(j); break;
             default: snprintf(p.msg, sizeof p.msg, "Comando desconhecido. Digite ? para ajuda. "); break;
         }
