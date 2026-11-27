@@ -44,7 +44,7 @@ bool abrirLog(Jogo& j) {
     j.log = fopen(ARQUIVO_LOG, "w");   /* criado/sobrescrito a cada execucao */
     if (!j.log) return false;
     fprintf(j.log, "=== MEDICOES - DADO BURGER ===\n");
-    imprimirCarga(j.log, j);
+    imprimirRelatorio(j.log, j);
     fprintf(j.log, "\n");
     fflush(j.log);
     return true;

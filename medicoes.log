@@ -1,51 +1,26 @@
 === MEDICOES - DADO BURGER ===
--- AVL: carregamento --
-Nos inseridos:           837253
-Altura resultante:       20
-Rotacoes (insercao):     837233
-<<<<<<< HEAD
-Tempo de carregamento:   0.346349 s
-=======
-Tempo de carregamento:   1.100024 s
->>>>>>> 3fd9aacb24cd695cb8cdd2da2105856c6a289f32
--- Historico: carregamento --
-Entradas carregadas:     3
-
-
-##### Partida 0 encerrada (DERROTA) - clientes atendidos: 1 #####
 === RELATORIO DE DESEMPENHO ===
 -- AVL: carregamento --
 Nos inseridos:           837253
 Altura resultante:       20
 Rotacoes (insercao):     837233
-Tempo de carregamento:   1.100024 s
+Tempo de carregamento:   1.852784 s
 -- Historico: carregamento --
-Entradas carregadas:     3
+Entradas carregadas:     100000
 -- AVL: buscas durante a partida --
-Total de buscas:                 2
-Total de comparacoes:            37
-Media de comparacoes por busca:  18.50
-Tempo total acumulado:           0.000007 s
+Total de buscas:                 0
+Total de comparacoes:            0
+Media de comparacoes por busca:  0.00
+Tempo total acumulado:           0.000000 s
 -- Tabela hash (sessao) --
 Tamanho (m):                     211
-Entradas ocupadas (n):           2
-Fator de carga (lambda):         0.0095
+Entradas ocupadas (n):           0
+Fator de carga (lambda):         0.0000
 Total de hits:                   0
-Total de misses:                 2
+Total de misses:                 0
 Taxa de acerto:                  0.0%
 Total de colisoes:               0
 -- Ordenacao do historico (ao acessar Historico) --
 (nenhum acesso ao Historico ate agora)
 ================================
 
-##### Acesso 1 ao Historico #####
--- Ordenacao do historico (ao acessar Historico) --
-Acessos ao Historico: 1
-Tamanho: 4 entradas (alfabetica)
-Merge Sort: 0.000002 s
-
-##### Acesso 2 ao Historico #####
--- Ordenacao do historico (ao acessar Historico) --
-Acessos ao Historico: 2
-Tamanho: 4 entradas (pontuacao decrescente)
-Merge Sort: 0.000004 s
